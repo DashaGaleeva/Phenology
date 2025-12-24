@@ -14,22 +14,23 @@ import warnings
 warnings.filterwarnings('ignore')
 # ============== ПАРАМЕТРИЗАЦИЯ ==============
 # Параметры обучения
-EPOCHS = 200
-BATCH_SIZE = 32
+EPOCHS = 100
+BATCH_SIZE = 64
 VALIDATION_SPLIT = 0.15
 TEST_SIZE = 0.15
 RANDOM_STATE = 42
 # Параметры архитектуры сети
 INPUT_FEATURES = 10
-HIDDEN_LAYER_1 = 64
-HIDDEN_LAYER_2 = 32
-HIDDEN_LAYER_3 = 16
+HIDDEN_LAYER_1 = 128
+HIDDEN_LAYER_2 = 64
+HIDDEN_LAYER_3 = 32
+HIDDEN_LAYER_4 = 16
 OUTPUT_CLASSES = 4
 # Параметры оптимизатора
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.0001
 # ============== ГЕНЕРАЦИЯ ДАТАСЕТА ==============
 np.random.seed(RANDOM_STATE)
-n_samples = 3000
+n_samples = 50000
 # Генерируем климатические факторы
 temperature = np.random.uniform(-20, 40, n_samples)
 precipitation = np.random.uniform(0, 200, n_samples)
@@ -69,7 +70,7 @@ X_test = scaler.transform(X_test)
 print(f"Размер тренировочного набора: {X_train.shape}")
 print(f"Размер тестового набора: {X_test.shape}")
 # ============== ПОСТРОЕНИЕ МОДЕЛИ ==============
-model = tf.keras.Sequential([ tf.keras.layers.Dense( HIDDEN_LAYER_1, activation='relu', input_shape=(INPUT_FEATURES,), name='input_layer' ), tf.keras.layers.Dropout(0.3), tf.keras.layers.Dense( HIDDEN_LAYER_2, activation='relu', name='hidden_1' ), tf.keras.layers.Dropout(0.2), tf.keras.layers.Dense( HIDDEN_LAYER_3, activation='relu', name='hidden_2' ), tf.keras.layers.Dropout(0.2), tf.keras.layers.Dense( OUTPUT_CLASSES, activation='softmax', name='output_layer' ) ])
+model = tf.keras.Sequential([ tf.keras.layers.Dense( HIDDEN_LAYER_1, activation='relu', input_shape=(INPUT_FEATURES,), name='input_layer' ), tf.keras.layers.Dropout(0.3), tf.keras.layers.Dense( HIDDEN_LAYER_2, activation='relu', name='hidden_1' ), tf.keras.layers.Dropout(0.3), tf.keras.layers.Dense( HIDDEN_LAYER_3, activation='relu', name='hidden_2' ), tf.keras.layers.Dropout(0.2), tf.keras.layers.Dense( HIDDEN_LAYER_4, activation='relu', name='hidden_3' ), tf.keras.layers.Dropout(0.2), tf.keras.layers.Dense( OUTPUT_CLASSES, activation='softmax', name='output_layer' ) ])
 # Компилируем модель
 optimizer = tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE)
 model.compile( optimizer=optimizer, loss='categorical_crossentropy', metrics=['accuracy'] )
@@ -110,12 +111,6 @@ sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
 plt.title('Матрица ошибок')
 plt.ylabel('True')
 plt.xlabel('Predicted')
-# Отчет о классификации
-plt.subplot(2, 3, 4)
-plt.axis('off')
-report = classification_report( y_test_classes, y_pred_classes, target_names=['Dormancy', 'Bud Break', 'Flowering', 'Fruiting'], output_dict=True )
-report_text = f"Precision: {report['weighted avg']['precision']:.3f}\n" + f"Recall: {report['weighted avg']['recall']:.3f}\n" + f"F1-Score: {report['weighted avg']['f1-score']:.3f}"
-plt.text(0.1, 0.5, report_text, fontsize=12, family='monospace')
 plt.tight_layout()
 plt.show()
 # ============== ТЕСТИРОВАНИЕ НА ПРИМЕРАХ ==============
@@ -136,4 +131,3 @@ test_sample_3 = scaler.transform(test_sample_3.reshape(1, -1))
 pred_3 = model.predict(test_sample_3)
 print(f"Пример 3 (Лето): {phenology_phases[np.argmax(pred_3[0])]} (уверенность: {np.max(pred_3[0])*100:.1f}%)")
 print("\n✅ Обучение и тестирование завершены!")
-
